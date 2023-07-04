@@ -1,0 +1,6 @@
+<select class="form-select mb-2" data-control="select2" data-hide-search="true" data-placeholder="Select an option" name="{{ field.html_name }}" id="{{ field.auto_id }}">
+    <option></option>
+    {% for value, label in field.field.choices %}
+        <option value="{{ value }}" {% if value|stringformat:"s" == field.value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+</select>

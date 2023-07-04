@@ -1,0 +1,15 @@
+<h1>Inventory Document</h1>
+
+<h2>Inventory Details</h2>
+<p>Inventory Name: {{ inventory.name }}</p>
+<p>Inventory Description: {{ inventory.description }}</p>
+
+<h2>Document Form</h2>
+<form method="post">
+  {% csrf_token %}
+  
+  <!-- Display form fields -->
+  {{ form.as_p }}
+  
+  <button type="submit">Submit</button>
+</form>

@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    {% load i18n %}
+
+    <h2>{% trans "Are you sure?" %}</h2>
+
+    {% if perms.opts.delete %}
+        {% if protected %}
+            <div class="deletelink-box">
+                <p>{% blocktrans with object_name=opts.verbose_name %}Deleting the '{{ object_name }}' {{ object_name }} would result in removing the following protected related objects:{% endblocktrans %}</p>
+                <ul class="deletelink">
+                    {% for obj in protected %}
+                        <li>{{ obj }}</li>
+                    {% endfor %}
+                </ul>
+                <p>{% trans "Are you sure you want to delete this object?" %}</p>
+            </div>
+        {% endif %}
+        <form method="post" action="{{ delete_url }}">
+            {% csrf_token %}
+            <input type="hidden" name="{{ action_checkbox_name }}" value="{{ action_checkbox_value }}"/>
+            <input type="hidden" name="next" value="{{ redirect_url }}"/>
+            <div class="submit-row">
+                {% if protected %}
+                    <p class="deletelink-box">
+                        <strong>{% trans "Protected related objects:" %}</strong>
+                        <ul class="deletelink">
+                            {% for obj in protected %}
+                                <li>{{ obj }}</li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                {% endif %}
+                <input type="submit" value="{% trans "Yes, I'm sure" %}" class="deletelink"/>
+                <a href="{{ cancel_url }}" class="cancel-link">{% trans "No, take me back" %}</a>
+            </div>
+        </form>
+    {% else %}
+        <p>{% trans "Sorry, you don't have permission to delete this object." %}</p>
+    {% endif %}
+{% endblock %}

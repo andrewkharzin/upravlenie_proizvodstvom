@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+<!--begin::Modal body-->
+<!-- Add this HTML anywhere in your template -->
+{% block content %}
+<h1>Client Details</h1>
+<p>Client ID: {{ customer.id }}</p>
+<p>Client Name: {{ customer.name }}</p>
+<!-- Add more client fields as necessary -->
+
+<h2>Orders</h2>
+<ul>
+  {% for order in orders %}
+    <li>Order ID: {{ order.order_number }}</li>
+    
+    <!-- Add more order fields as necessary -->
+  {% endfor %}
+</ul>
+
+{% endblock %}
+  
+<!--end::Modal body-->

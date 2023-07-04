@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Session Locked</h2>
+  <p>Your session has been locked. To unlock, please enter your password.</p>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <input type="password" name="password" class="form-control" placeholder="Password" required>
+    <button type="submit" name="unlock" class="btn btn-primary mt-3">Unlock</button>
+    <button type="submit" name="logout" class="btn btn-secondary mt-3">Logout</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+<!-- custom_file_input.html -->
+<p style="display: none">{{ value }}</p>
+
+<!-- templates/admin/order/custom_file_input.html -->
+<div class="custom-file">
+    <p style="display: none">{{ value }}</p>
+    {{ widget }}
+    <label class="custom-file-label" for="{{ widget.attrs.id }}">{{ widget.value.name }}</label>
+</div>
+

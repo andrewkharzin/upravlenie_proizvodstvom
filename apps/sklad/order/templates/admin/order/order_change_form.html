@@ -1,0 +1,61 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'admin/order/js/update_payment.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    // Function to calculate the total amount
+    function updateTotalAmount() {
+      var price = parseFloat($("#id_price").val());
+      var quantity = parseInt($("#id_quantity").val());
+
+      // Calculate the total amount
+      var total = price * quantity;
+
+      // Update the total field value
+      $("#id_total").val(total.toFixed(2));
+    }
+
+    // Event listeners for price and quantity fields
+    $("#id_price").on("input", updateTotalAmount);
+    $("#id_quantity").on("input", updateTotalAmount);
+
+    // Material info AJAX request (assuming you have this code already)
+    $("#id_material").change(function () {
+      var materialId = $(this).val();
+      $.ajax({
+        url: "{% url 'material_info' %}",
+        data: {
+          material_id: materialId,
+        },
+        success: function (response) {
+          $("#material-info").html(response);
+        },
+      });
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+{% if original.qr_code_image and original.qr_code_image.url %}
+    <!-- <h2>QR Code Preview:</h2>
+    <div id="qr-code-preview"></div> -->
+{% endif %}
+{% endblock %}
+
+{% block after_related_objects %}
+<div id="material-info"></div>
+{% endblock %}

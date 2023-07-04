@@ -1,0 +1,30 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Function to handle the QR code scanning
+  function handleScanResult(result) {
+    if (result && result !== "") {
+      var orderNumber = result;
+      var customerName = $(".qr-code[data-order-number='" + orderNumber + "']").data("customer-name");
+      var orderDate = $(".qr-code[data-order-number='" + orderNumber + "']").data("order-date");
+      var deadline = $(".qr-code[data-order-number='" + orderNumber + "']").data("deadline");
+
+      // Display the order details in a tooltip or any other desired way
+      var tooltipContent = "Order Number: " + orderNumber + "<br>"
+                          + "Customer Name: " + customerName + "<br>"
+                          + "Order Date: " + orderDate + "<br>"
+                          + "Deadline: " + deadline;
+
+      $(".qr-code[data-order-number='" + orderNumber + "']").attr("title", tooltipContent);
+    }
+  }
+
+  // Add an event listener to the QR code
+  $(".qr-code").on("click", function() {
+    // Call the scanning function here, such as using a QR code scanning library or a custom implementation
+    // Once the scan result is obtained, call the handleScanResult function with the result
+    var scanResult = "123456"; // Replace with the actual scan result
+    handleScanResult(scanResult);
+  });
+});
+</script>
