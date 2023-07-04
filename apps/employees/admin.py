@@ -68,7 +68,6 @@ class WorkShiftAdmin(admin.ModelAdmin):
 @admin.register(CalendarEvent)
 class CalendarEventAdmin(admin.ModelAdmin):
     list_display = ('title', 'event_type', 'start_date', 'end_date')
-    list_filter = ('event_type',)
     search_fields = ('title',)
 
 

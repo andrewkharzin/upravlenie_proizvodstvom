@@ -71,7 +71,7 @@ var KTAppCalendar = (function () {
       B && (t.dispose(), (B = !1));
     },
     N = () => {
-      (f.innerText = "Add a New Event"), v.show();
+      (f.innerText = "Добавить событие"), v.show();
       const t = p.querySelectorAll('[data-kt-calendar="datepicker"]'),
         r = p.querySelector("#kt_calendar_datepicker_allday");
       r.addEventListener("click", (e) => {
@@ -96,7 +96,7 @@ var KTAppCalendar = (function () {
                       setTimeout(function () {
                         _.removeAttribute("data-kt-indicator"),
                           Swal.fire({
-                            text: "New event added to calendar!",
+                            text: "Новое событие добавленно!",
                             icon: "success",
                             buttonsStyling: !1,
                             confirmButtonText: "Ok, got it!",

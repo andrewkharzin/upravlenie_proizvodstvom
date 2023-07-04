@@ -166,13 +166,14 @@ class CalendarEvent(models.Model):
         verbose_name_plural = "Календарь"
 
     event_type_choices = [
-        ('meeting', 'Meeting'),
-        ('holiday', 'Holiday'),
-        ('birthday', 'Birthday'),
-        ('other', 'Other'),
+        ('встреча', 'Встреча'),
+        ('заказ', 'Заказ'),
+        ('день рождения', 'День рождения'),
+        ('учет', 'Учет'),
+        ('прочее', 'Прочее'),
     ]
 
-    event_type = models.CharField(_("Тип события"), max_length=10, choices=event_type_choices)
+    event_type = models.CharField(_("Тип события"), max_length=30, choices=event_type_choices, default="прочее")
     title = models.CharField(_("Название"),  max_length=100)
     start_date = models.DateField(_("Начало"), null=True, blank=True)
     end_date = models.DateField(_("Окончание"), null=True, blank=True)
