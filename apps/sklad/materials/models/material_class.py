@@ -1,5 +1,6 @@
 import os
 import uuid
+from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -39,6 +40,7 @@ class Material(models.Model):
     properties = GenericRelation('Property')
     image = models.ImageField(upload_to=material_image_upload_path, blank=True, null=True)
     date_created = models.DateField(auto_now=True)
+    purchase_price = models.DecimalField(_("Цена закупки"), max_digits=10, decimal_places=2, default="0.0")
     
    
     class Meta:

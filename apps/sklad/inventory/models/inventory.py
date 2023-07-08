@@ -4,7 +4,8 @@ from django.utils import timezone
 from django.template.defaultfilters import slugify
 # from apps.sklad.materials.models.material_class import Material 
 from openpyxl import Workbook
-from apps.accounts.models import User 
+from apps.accounts.models import User
+from django.utils.translation import gettext_lazy as _
 
 
 class Inventory(models.Model):
@@ -23,6 +24,7 @@ class Inventory(models.Model):
         on_delete=models.CASCADE,
         related_name='inventories'
     )
+    # materials = models.ManyToManyField('materials.Material', related_name='inventories')
     description = models.TextField(blank=True)
     date_created = models.DateTimeField(default=timezone.now)
     date_modified = models.DateTimeField(auto_now=True)
@@ -49,7 +51,7 @@ class Inventory(models.Model):
 class InventoryItem(models.Model):
 
     class Meta:
-        verbose_name = "Позиция"
+        verbose_name_plural = "Позиции"
 
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='items')
     received_quantity = models.IntegerField(default=0)
@@ -100,7 +102,8 @@ class InventoryItem(models.Model):
 class InventoryHistory(models.Model):
 
     class Meta:
-        verbose_name_plural = "Трэгинг" 
+        verbose_name_plural = "Трэкинг" 
+
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='history_entries')
     date_modified = models.DateTimeField(auto_now=True)
     reason = models.CharField(max_length=20, choices=Inventory.REASON_CHOICES)

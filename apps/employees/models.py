@@ -1,14 +1,55 @@
 from django.db import models
+from django.contrib.auth.models import Group
+import os
+import uuid
+import datetime
+from PIL import Image
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from transliterate import translit
+from apps.accounts.models import User
+from schedule.models import Event, Calendar
 from django.db.models import F, Sum
 from apps.sklad.order.models.service_class import Service
 from django.db.models.signals import post_save
 from django.utils import timezone
 from django.utils.text import slugify
 from django.dispatch import receiver
+from django.db.models.signals import pre_save
+from django.urls import reverse
 from django.db.models.signals import pre_delete
 from decimal import Decimal
+from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
 
+def upload_empl_pic_to(instance, filename):
+    # Генерация уникального имени файла
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    
+    # Формирование пути сохранения файла
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
+    day = today.day
+    return f"photos/{year}/{month}/{day}/{filename}"
+
+def create_thumbnail(image):
+    # Открываем изображение
+    img = Image.open(image.path)
+
+    # Создаем превью с размером 100x100 пикселей
+    thumb_size = (100, 100)
+    img.thumbnail(thumb_size)
+
+    # Определяем путь для сохранения превью
+    thumb_path = f"{os.path.splitext(image.path)[0]}_thumb.jpg"
+
+    # Сохраняем превью
+    img.save(thumb_path)
+
+    # Возвращаем путь к превью
+    return thumb_path
 
 class Employee(models.Model):
 
@@ -16,16 +57,75 @@ class Employee(models.Model):
         verbose_name = "Сотрудник"
         verbose_name_plural = "Сотрудники"
 
-    name = models.CharField(max_length=100)
-    position = models.CharField(max_length=100)
-    hired_date = models.DateField()
+    name = models.CharField(_("ФИО сотрудника"), max_length=100)
+    position = models.CharField(_("Должность"), max_length=100)
+    hired_date = models.DateField(_("Дата найма"))
+    birthday = models.DateField(_("День рождения"))
+    photo = models.ImageField(upload_to=upload_empl_pic_to, default="users/default.jpeg")
+    photo_thumb = models.ImageField(upload_to=upload_empl_pic_to, blank=True)
+    phone = PhoneNumberField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    is_staff = models.BooleanField(_("Добавить аккаунт?"), default=False)
+    rating = models.FloatField(default=0.0) 
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        if self.photo and not self.photo_thumb:
+            # Создаем превью фотографии
+            thumb_path = create_thumbnail(self.photo)
+            
+            # Сохраняем путь к превью
+            self.photo_thumb = thumb_path
+            super().save(*args, **kwargs)
+    
+    def image_tag(self):
+        return format_html('<img src="{}" width="50" height="50" />', self.photo.url)
+    image_tag.short_description = 'Фото'
+
+    def thumb_image_tag(self):
+        if self.photo_thumb:
+            return format_html('<img src="{}" width="50" height="50" />', self.photo_thumb.url)
+        else:
+            return mark_safe('<span>Нет превью</span>')
+    thumb_image_tag.short_description = 'Превью'
 
     def __str__(self):
         return self.name
 
+# # @receiver(pre_save, sender=Employee)
+# def create_birthday_event(sender, instance, created, **kwargs):
+#     if created and instance.birthday:
+#         calendar_id = 1  # ID календаря "Дни рождения"
+#         try:
+#             calendar = Calendar.objects.get(id=calendar_id)
+#             event = Event.objects.create(
+#                 title=f"День рождения {instance.name}",
+#                 start=instance.birthday,
+#                 end=instance.birthday,
+#                 calendar=calendar
+#             )
+#             event.save()
+#         except Calendar.DoesNotExist:
+#             pass
 
 
+# @receiver(pre_save, sender=Employee)
+# def create_user(sender, instance, **kwargs):
+#     if instance.pk is None and instance.is_staff and not instance.user:
+#         username = translit(instance.name.split()[0], 'ru', reversed=True)  # Transliterate the first word of the name
+#         email = f"{username}@mycompany.com"  # Generate the email address
+#         password = User.objects.make_random_password()
+#         user = User.objects.create_user(email=email, password=password)
+#         instance.user = user
+
+# @receiver(post_save, sender=Employee)
+# def add_employee_to_registered_group(sender, instance, created, **kwargs):
+#     if created and instance.is_staff:
+#         registered_group, _ = Group.objects.get_or_create(name='Зарегистрированные')
+#         instance.user.groups.add(registered_group)
 
 class WorkShift(models.Model):
 
@@ -116,15 +216,28 @@ class WorkOrder(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UNAPPROVED')
     code = models.CharField(max_length=10, unique=True, editable=False, null=True, blank=True)
 
-    def delete(self, *args, **kwargs):
-        if self.status == 'APPROVED':
-            raise models.ProtectedError("Approved work orders cannot be deleted.", self)
-        super().delete(*args, **kwargs)
+    def create_calendar_event(self):
+        services_list = ", ".join(str(service) for service in self.services.all())
+        description = f"Наряд на выполнение следующих работ: {services_list}"
+        event = EmplEvent(
+            event_type='work_order',
+            event_title=f"Заказ наряд для: {self.employee.name}",
+            start=self.date,
+            end=self.date,
+            event_description=description,
+        )
+        event.save()
+
+    # def delete(self, *args, **kwargs):
+    #     if self.status == 'APPROVED':
+    #         raise models.ProtectedError("Approved work orders cannot be deleted.", self)
+    #     super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Generate code only for new instances
             self.code = self.generate_unique_code()
         super().save(*args, **kwargs)
+        self.create_calendar_event()
 
     def generate_unique_code(self):
         employee_initials = "".join(word[0] for word in self.employee.name.split())
@@ -136,12 +249,23 @@ class WorkOrder(models.Model):
         total_amount = self.services.aggregate(total=Sum('cost'))['total'] or 0
         return total_amount
     
-@receiver(pre_delete, sender=WorkOrder)
-def protect_approved_work_order(sender, instance, **kwargs):
-    if instance.status == 'APPROVED':
-        raise models.ProtectedError("Approved work orders cannot be deleted.", instance)
+@receiver(post_save, sender=WorkOrder)
+def create_work_order_calendar_event(sender, instance, created, **kwargs):
+    if created:
+        instance.create_calendar_event()
+    
+    
+# @receiver(pre_delete, sender=WorkOrder)
+# def protect_approved_work_order(sender, instance, **kwargs):
+#     if instance.status == 'APPROVED':
+#         raise models.ProtectedError("Approved work orders cannot be deleted.", instance)
 
 class WorkOrderService(models.Model):
+
+    class Meta:
+        verbose_name = "Работа"
+        verbose_name_plural = "Работы"
+
     work_order = models.ForeignKey(WorkOrder, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
@@ -161,23 +285,40 @@ def update_work_order_service_price(sender, instance, **kwargs):
     
 
 
-class CalendarEvent(models.Model):
+class EmplEvent(Event):
+
     class Meta:
-        verbose_name_plural = "Календарь"
+        verbose_name_plural = "Cобытия"
+        
 
     event_type_choices = [
+        ('наряд', 'Наряд'),
         ('встреча', 'Встреча'),
         ('заказ', 'Заказ'),
         ('день рождения', 'День рождения'),
         ('учет', 'Учет'),
         ('прочее', 'Прочее'),
     ]
-
+    
+    title = None
+    description = None
+    
     event_type = models.CharField(_("Тип события"), max_length=30, choices=event_type_choices, default="прочее")
-    title = models.CharField(_("Название"),  max_length=100)
-    start_date = models.DateField(_("Начало"), null=True, blank=True)
-    end_date = models.DateField(_("Окончание"), null=True, blank=True)
-    description = models.TextField(_("Описание"), blank=True)
+    event_title = models.CharField(_("Название"),  max_length=100)
+    event_description = models.TextField(_("Описание"), blank=True)
+   
+    def save(self, *args, **kwargs):
+        # Получите объект календаря с id=1
+        calendar = Calendar.objects.get(id=2)
+        
+        # Присвойте полю calendar значение календаря
+        self.calendar = calendar
+        
+        # Сохраните событие
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('employees:calendar_event_detail', args=[str(self.id)])
 
     def __str__(self):
         return self.title

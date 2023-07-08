@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.db.models import F, Sum
+from schedule.admin import EventAdmin
 from django.urls import reverse
 from django.utils.html import format_html
 from apps.sklad.order.models.service_class import Service
-from .models import Employee, WorkShift, Salary, WorkOrder, WorkOrderService, CalendarEvent
+from .models import Employee, WorkShift, Salary, WorkOrder, WorkOrderService, EmplEvent
+from .forms import EmployeeForm
 
 
 @admin.register(Salary)
@@ -38,6 +40,9 @@ class SalaryAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 class WorkOrderServiceInline(admin.TabularInline):
+
+    class Meta:
+        verbose_name = "Работы в наряд"
     model = WorkOrderService
     extra = 1
 
@@ -65,13 +70,33 @@ class WorkShiftAdmin(admin.ModelAdmin):
     list_filter = ('employee__name',)
     search_fields = ('employee__name',)
 
-@admin.register(CalendarEvent)
+@admin.register(EmplEvent)
 class CalendarEventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'event_type', 'start_date', 'end_date')
-    search_fields = ('title',)
+    list_display = ('id', 'event_title', 'event_type', 'event_description')
+    list_filter = ('event_type',)
+    search_fields = ('event_title',)
 
 
-admin.site.register(Employee)
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    form = EmployeeForm
+    list_display = ('name', 'position', 'hired_date', 'phone', 'email', 'work_email', 'display_photo', 'rating')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('user')
+
+    def work_email(self, obj):
+        if obj.user:
+            return obj.user.email
+        return "Без доступа"  # Customize the message as needed
+
+    work_email.short_description = 'Доступ к системе'
+
+    def display_photo(self, obj):
+        return format_html('<img src="{}" width="50" height="50" />', obj.photo.url)
+    display_photo.short_description = 'Фото'
+
 
 
 

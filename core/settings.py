@@ -127,8 +127,17 @@ USE_TZ = True
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
 
 ]
+
+BOWER_COMPONENTS_ROOT = '/Users/andrewkhz/Dev/django/dhs/node_modules/bower/bower_components/'
+
+BOWER_INSTALLED_APPS = (
+    'jquery',
+    'jquery-ui',
+    'bootstrap'
+)
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [

@@ -28,6 +28,10 @@ THIRDPARTY_APPS = [
     'mptt',
     'django_mptt_admin',
     'import_export',
+    'schedule',
+    'djangobower',
+    'star_ratings',
+    'phonenumber_field',
 
 ]
     

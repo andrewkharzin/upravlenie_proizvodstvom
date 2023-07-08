@@ -1,4 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
@@ -33,3 +35,17 @@ def session_lock_view(request):
             logout(request)
             return redirect('login')
     return render(request, 'accounts/session_lock.html')
+
+
+# def telegram_login(request):
+#     # Получаем сообщение от Telegram бота
+#     message = request.POST.get('message', '')
+    
+#     if message == '/login':
+#         # Выполняем вход в Django
+#         user = authenticate(username='telegram_user', password='telegram_password')
+#         if user is not None:
+#             login(request, user)
+#             return HttpResponse('Вход выполнен')
+#         else:
+#             return HttpResponse('Ошибка входа')

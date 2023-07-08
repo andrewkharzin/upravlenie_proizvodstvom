@@ -14,7 +14,7 @@ class MaterialAdmin(admin.ModelAdmin):
     
 
     inlines = [PropertyInline]
-    list_display = ['name', 'material_type', 'display_related_objects', 'display_image']
+    list_display = ['name', 'material_type', 'display_related_objects', 'purchase_price', 'display_image']
     # display_related_objects.short_description = 'Характеристики'
     readonly_fields = ['display_image']
     search_fields = ['name', 'material_type']

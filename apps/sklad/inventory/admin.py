@@ -4,6 +4,7 @@ from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from openpyxl import Workbook
 from django.urls import path
+from decimal import Decimal
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.safestring import mark_safe
@@ -26,7 +27,7 @@ class InventoryResources(resources.ModelResource):
     def get_item_count(self, obj):
         return obj.items.count()
 
-    get_material_info.short_description = 'Material Info'
+    get_material_info.short_description = 'Материал'
     get_item_count.short_description = 'Item Count'
 
 
@@ -37,11 +38,15 @@ class InventoryItemResources(resources.ModelResource):
 
     class Meta:
         model = Inventory
-        fields = ('material', 'date_created', 'date_modified', 'material_info')
+        fields = ('material', 'date_created', 'date_modified', 'material_info', 'get_inv_total_count')
         import_id_fields = ('date_created',)
 
     def get_material_info(self, obj):
         return obj.inventory.material_info()
+    
+    def get_inv_total_count(self, obj):
+        return obj.received_quantity.count()
+    
 
     get_material_info.short_description = 'Material Info'
 
@@ -66,8 +71,11 @@ class InventoryItemInline(admin.TabularInline):
 class InventoryAdmin(ImportExportModelAdmin):
     resource_class = InventoryResources
     inlines = [InventoryItemInline]
-    list_display = ['material', 'date_created', 'date_modified', 'material_info', 'get_item_count', 'reason', 'user']
+    list_display = ['material', 'date_created', 'date_modified', 'material_info', 'get_total_received_quantity',  'reason', 'user']
     change_list_template = 'admin/inventory_change_list.html'
+
+    raw_id_fields = ['material', ]
+
 
     def generate_report_button(self, obj):
         return mark_safe(f'<a href="/admin/inventory/inventory/{obj.id}/generate-report/">Generate Report</a>')
@@ -77,10 +85,26 @@ class InventoryAdmin(ImportExportModelAdmin):
     def get_material_info(self, obj):
         return obj.material_info()
 
+
     def get_item_count(self, obj):
         return obj.items.count()
+    
 
-    get_material_info.short_description = 'Material Info'
+    get_material_info.short_description = 'Материал'
+
+    def get_total_received_quantity(self, obj):
+        return sum(item.received_quantity for item in obj.items.all())
+
+    get_total_received_quantity.short_description = 'Получено:'
+
+
+    # def calculate_total_cost(self, obj):
+    #     total_cost = 0
+    #     for item in obj.inventoryitem_set.all():
+    #         total_cost += item.material.purchase_price * item.quantity
+    #     return total_cost
+
+    # calculate_total_cost.short_description = 'Оценочная стоимость по закупке'
 
     def generate_report(self, request, inventory_id):
         inventory = Inventory.objects.get(id=inventory_id)

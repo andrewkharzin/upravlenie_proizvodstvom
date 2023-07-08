@@ -1,0 +1,7 @@
+<h1>Rate Employee - {{ employee.name }}</h1>
+<form method="POST" action="{% url 'employees:rate_employee' employee_id=employee.id %}">
+    {% csrf_token %}
+    <label for="rating">Rating:</label>
+    <input type="number" name="rating" step="0.1" min="0" max="5" required>
+    <button type="submit">Rate</button>
+</form>
