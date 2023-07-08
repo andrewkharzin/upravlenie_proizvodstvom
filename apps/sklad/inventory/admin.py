@@ -34,11 +34,12 @@ class InventoryResources(resources.ModelResource):
 
 class InventoryItemResources(resources.ModelResource):
     material_info = fields.Field(attribute='material_info', column_name='Material Info')
+    total_recieved_cost = fields.Field(attribute='get_total_recieved_cost', column_name='Total Cost')
     
 
     class Meta:
         model = Inventory
-        fields = ('material', 'date_created', 'date_modified', 'material_info', 'get_inv_total_count')
+        fields = ('material', 'date_created', 'date_modified', 'material_info', 'get_inv_total_count', 'total_recieved_cost')
         import_id_fields = ('date_created',)
 
     def get_material_info(self, obj):
@@ -71,7 +72,7 @@ class InventoryItemInline(admin.TabularInline):
 class InventoryAdmin(ImportExportModelAdmin):
     resource_class = InventoryResources
     inlines = [InventoryItemInline]
-    list_display = ['material', 'date_created', 'date_modified', 'material_info', 'get_total_received_quantity',  'reason', 'user']
+    list_display = ['material', 'date_created', 'date_modified', 'material_info', 'get_total_received_quantity', 'get_total_recieved_cost',  'reason', 'user']
     change_list_template = 'admin/inventory_change_list.html'
 
     raw_id_fields = ['material', ]
@@ -85,17 +86,24 @@ class InventoryAdmin(ImportExportModelAdmin):
     def get_material_info(self, obj):
         return obj.material_info()
 
-
+    # Получение общего количества полученнго материала
     def get_item_count(self, obj):
         return obj.items.count()
-    
-
     get_material_info.short_description = 'Материал'
 
     def get_total_received_quantity(self, obj):
         return sum(item.received_quantity for item in obj.items.all())
 
     get_total_received_quantity.short_description = 'Получено:'
+
+
+    #Получение стоимости общего количества полученнго материала
+    def get_total_recieved_cost(self, obj):
+        total_cost = sum(item.received_quantity for item in obj.items.all()) * obj.material.purchase_price
+        # return sum(item.received_quantity for item in obj.items.all()) * obj.material.purchase_price 
+        return f"{total_cost} Рублей"
+
+    get_total_recieved_cost.short_description = 'Оценочная стоимость'
 
 
     # def calculate_total_cost(self, obj):

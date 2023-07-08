@@ -71,33 +71,6 @@ class InventoryItem(models.Model):
 
         return quantity_after_inventory
 
-    def generate_report(self):
-        workbook = Workbook()
-        sheet = workbook.active
-
-        sheet['A1'] = 'Inventory'
-        sheet['B1'] = 'Material'
-        sheet['C1'] = 'Name'
-        sheet['D1'] = 'Description'
-        sheet['E1'] = 'Quantity'
-        sheet['F1'] = 'Responsible Person'
-        sheet['G1'] = 'Received By'
-        sheet['H1'] = 'Received Date'
-
-        sheet['A2'] = self.inventory.name
-        sheet['B2'] = self.material.name
-        sheet['C2'] = self.name
-        sheet['D2'] = self.description
-        sheet['E2'] = self.quantity
-        sheet['F2'] = self.responsible_person.username if self.responsible_person else ''
-        sheet['G2'] = self.received_by.username if self.received_by else ''
-        sheet['H2'] = self.received_date.strftime('%Y-%m-%d %H:%M:%S')
-
-        filename = slugify(self.inventory.name) + '_' + slugify(self.material.name) + '.xlsx'
-        workbook.save(filename)
-
-        return filename
-
 
 class InventoryHistory(models.Model):
 

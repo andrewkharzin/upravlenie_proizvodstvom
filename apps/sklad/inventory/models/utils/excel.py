@@ -17,7 +17,7 @@ def export_inventory(request):
     worksheet = workbook.active
 
     # Define the column headers
-    headers = ['Inventory ID', 'Материал', 'Количество', 'Описание', 'Дата добавления', 'Основание', 'Пользователь',
+    headers = ['Inventory ID', 'Материал', 'Количество', 'Закуп.Цена за шт', 'Описание',  'Дата добавления', 'Основание', 'Пользователь',
                'История - основание', 'История - дата']
 
     # Write the headers to the worksheet
@@ -34,10 +34,11 @@ def export_inventory(request):
         worksheet.cell(row=row_num, column=1, value=inventory_item.id)
         worksheet.cell(row=row_num, column=2, value=inventory.material.name)
         worksheet.cell(row=row_num, column=3, value=inventory_item.received_quantity)
-        worksheet.cell(row=row_num, column=4, value=inventory.description)
-        worksheet.cell(row=row_num, column=5, value=inventory.date_created.strftime('%Y-%m-%d %H:%M:%S'))
-        worksheet.cell(row=row_num, column=6, value=inventory.reason)
-        worksheet.cell(row=row_num, column=7, value=inventory.user.email)
+        worksheet.cell(row=row_num, column=4, value=inventory.material.purchase_price)
+        worksheet.cell(row=row_num, column=5, value=inventory.description)
+        worksheet.cell(row=row_num, column=6, value=inventory.date_created.strftime('%Y-%m-%d %H:%M:%S'))
+        worksheet.cell(row=row_num, column=7, value=inventory.reason)
+        worksheet.cell(row=row_num, column=8, value=inventory.user.email)
 
         # Write the history entries to the worksheet
         for history_row_num, history_entry in enumerate(history_entries, 1):
