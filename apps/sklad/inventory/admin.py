@@ -72,7 +72,7 @@ class InventoryItemInline(admin.TabularInline):
 class InventoryAdmin(ImportExportModelAdmin):
     resource_class = InventoryResources
     inlines = [InventoryItemInline]
-    list_display = ['material', 'date_created', 'date_modified', 'material_info', 'get_total_received_quantity', 'get_total_recieved_cost',  'reason', 'user']
+    list_display = ['inv_number', 'material', 'date_created', 'date_modified', 'material_info', 'get_total_received_quantity', 'get_total_recieved_cost',  'reason', 'user']
     change_list_template = 'admin/inventory_change_list.html'
 
     raw_id_fields = ['material', ]

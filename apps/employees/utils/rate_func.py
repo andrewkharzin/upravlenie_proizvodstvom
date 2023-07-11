@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from ..models import Employee
+from ..models.employee import Employee
 
 def increase_rating(request, employee_id):
     employee = get_object_or_404(Employee, pk=employee_id)

@@ -18,8 +18,13 @@ def login_view(request):
             return redirect('home')  # Replace 'home' with your desired homepage URL name
     else:
         form = AuthenticationForm()
+    
+    context = {
+        'page_title': page_title,
+        'form': form
+    }
 
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'accounts/login.html', context)
 
 
 def logout_view(request):

@@ -5,6 +5,7 @@ DJANGO_APPS = [
     # 'admin_tools.theming',
     # 'admin_tools.menu',
     # 'admin_tools.dashboard',
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -20,6 +21,7 @@ PROJECT_APPS = [
    'apps.sklad.inventory',
    'apps.sklad.order',
    'apps.employees',
+   'apps.infobase',
 ]
     
 THIRDPARTY_APPS = [

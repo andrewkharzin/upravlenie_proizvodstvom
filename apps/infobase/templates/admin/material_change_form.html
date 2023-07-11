@@ -1,0 +1,37 @@
+{% extends "admin/change_form.html" %}
+
+
+<div class="row">
+  <div class="col-md-4">
+    {{ form.non_field_errors }}
+    <div class="form-group">
+      {{ form.title.label_tag }}
+      {{ form.title }}
+    </div>
+    <div class="form-group">
+      {{ form.country.label_tag }}
+      {{ form.country }}
+    </div>
+    <div class="form-group">
+      {{ form.color.label_tag }}
+      {{ form.color }}
+    </div>
+    <div class="form-group">
+      {{ form.type.label_tag }}
+      {{ form.type }}
+    </div>
+    <div class="form-group">
+      {{ form.structure.label_tag }}
+      {{ form.structure }}
+    </div>
+    <div class="form-group">
+      {{ form.density.label_tag }}
+      {{ form.density }}
+    </div>
+  </div>
+  <div class="col-md-8">
+    {{ form.larger_image.label_tag }}
+    {{ form.larger_image }}
+  </div>
+</div>
+

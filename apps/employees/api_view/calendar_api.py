@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from apps.employees.models import EmplEvent
+from apps.employees.models.employee import EmplEvent
 
 @csrf_exempt
 def create_event(request):

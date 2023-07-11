@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from .models import Employee, WorkShift, Salary, WorkOrder
+from .models.employee import Employee
+from .models.order_outfit import WorkOrder
+from .models.salary import Salary, WorkShift
 from apps.sklad.order.models.service_class import Service
-from .models import EmplEvent
+from .models.employee import EmplEvent
 
 
 def calendar_view(request):

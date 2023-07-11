@@ -25,6 +25,7 @@ class Inventory(models.Model):
         related_name='inventories'
     )
     # materials = models.ManyToManyField('materials.Material', related_name='inventories')
+    inv_number = models.CharField(max_length=50, unique=True, editable=False)
     description = models.TextField(blank=True)
     date_created = models.DateTimeField(default=timezone.now)
     date_modified = models.DateTimeField(auto_now=True)
@@ -35,12 +36,29 @@ class Inventory(models.Model):
         property_values = ', '.join(str(property) for property in self.material.properties.all())
         return f"{self.material.name} - {self.material.material_type} - {property_values}"
 
+    def generate_inv_number(self):
+        inv_type = ""
+        if self.reason == "первичная":
+            inv_type = "ИНВ"
+        elif self.reason == "повторная":
+            inv_type = "ИНП"
+        elif self.reason == "Списание":
+            inv_type = "ИНС"
+        date = self.date_created.strftime("%d%m%Y")
+        unique_id = str(self.id).zfill(6)
+        return f"{inv_type}-{date}-{unique_id}"
+
     def __str__(self):
 
         return f"Инвентаризация ({self.date_created} - {self.user.username})"
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        if not self.inv_number:
+            super().save(*args, **kwargs)  # Сохраняем модель для генерации уникального id
+            self.inv_number = self.generate_inv_number()
+            self.save()  # Сохраняем с присвоенным inv_number
+        else:
+            super().save(*args, **kwargs)
         InventoryHistory.objects.create(inventory=self, reason='Modified')
 
     def delete(self, *args, **kwargs):

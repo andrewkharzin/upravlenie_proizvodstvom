@@ -21,14 +21,18 @@ from .import views
 
 urlpatterns = [
     # path('admin_tools/', include('admin_tools.urls')),
+    path('grappelli/', include('grappelli.urls')),  # grappelli URLS
     path('', include('apps.employees.urls')),
     path('', views.home_view, name='home'),
     path('admin/', admin.site.urls),
     path('', include('apps.accounts.urls')),
-    path('inventory/', include('apps.sklad.inventory.urls')),  # Replace 'your_app' with the actual name of your app
-    path('', include('apps.sklad.order.urls')),  # Replace 'your_app' with the actual name of your app
-    path('materials/', include('apps.sklad.materials.urls')),  # Replace 'your_app' with the actual name of your app
-  
+    # Replace 'your_app' with the actual name of your app
+    path('inventory/', include('apps.sklad.inventory.urls')),
+    # Replace 'your_app' with the actual name of your app
+    path('', include('apps.sklad.order.urls')),
+    # Replace 'your_app' with the actual name of your app
+    path('materials/', include('apps.sklad.materials.urls')),
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

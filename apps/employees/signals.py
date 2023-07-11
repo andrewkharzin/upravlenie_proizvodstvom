@@ -4,9 +4,10 @@ from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.dispatch import receiver
 from transliterate import translit
-from apps.employees.models import Employee
+from apps.employees.models.employee import Employee
 from schedule.models import Calendar, Event
 from apps.accounts.models import User
+from .models.order_outfit import WorkOrder, WorkOrderService
 
 @receiver(pre_save, sender=Employee)
 def create_birthday_event(sender, instance, **kwargs):
@@ -40,3 +41,14 @@ def add_employee_to_registered_group(sender, instance, created, **kwargs):
     if created and instance.is_staff:
         registered_group, _ = Group.objects.get_or_create(name='Зарегистрированные')
         instance.user.groups.add(registered_group)
+
+@receiver(post_save, sender=WorkOrder)
+def create_work_order_calendar_event(sender, instance, created, **kwargs):
+    if created:
+        instance.create_calendar_event()
+
+
+@receiver(post_save, sender=WorkOrderService)
+def update_work_order_service_price(sender, instance, **kwargs):
+    total_price = instance.service.price_for_work * instance.quantity
+    WorkOrderService.objects.filter(pk=instance.pk).update(price=total_price)

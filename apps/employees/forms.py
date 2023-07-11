@@ -1,6 +1,6 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
-from apps.employees.models import Employee
+from apps.employees.models.employee import Employee
 
 class EmployeeForm(forms.ModelForm):
     phone = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': '+7(XXX)XXX-XX-XX'}))
